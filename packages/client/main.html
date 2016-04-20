@@ -1,0 +1,92 @@
+<head>
+    <title>ufs-example</title>
+</head>
+
+<body>
+<div id="page">
+    <h1>UFS Example</h1>
+    {{> uploadForm}}
+</div>
+</body>
+
+<template name="uploadForm">
+    <form>
+        <div class="bar">
+            <button name="upload" type="button">Upload</button>
+        </div>
+        <table>
+            <thead>
+            <tr>
+                <th></th>
+                <th>Name</th>
+                <th>Type</th>
+                <th>Extension</th>
+                <th>Size</th>
+                <th>Uploading</th>
+                <th>Processing</th>
+                <th>Complete</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            {{#each files}}
+                {{> file}}
+            {{else}}
+                <tr>
+                    <td colspan="8" style="text-align: center">No file</td>
+                </tr>
+            {{/each}}
+            </tbody>
+        </table>
+    </form>
+</template>
+
+<template name="file">
+    <tr>
+        <td>
+            {{#if uploading}}
+                <img src="/spinner.gif" width="48" height="48">
+            {{else}}
+                {{#if isAudio}}
+                    <audio src="{{url}}" controls></audio>
+                {{/if}}
+                {{#if isImage}}
+                    <img src="{{thumb.url}}">
+                {{/if}}
+                {{#if isText}}
+                    <img src="/file.png" width="48" height="48">
+                {{/if}}
+                {{#if isVideo}}
+                    <video src="{{url}}" controls width="64" height="64"></video>
+                {{/if}}
+            {{/if}}
+        </td>
+        <td><a href="{{versions.original.url}}" target="_blank">{{name}}</a></td>
+        <td>{{type}}</td>
+        <td>{{versions.original.extension}}</td>
+        <td style="white-space: nowrap">{{formatSize size}}</td>
+        <td>
+
+                {{#if versions.original.processing}}
+                    Yes
+                {{else}}
+                  No
+                {{/if}}
+
+        </td>
+        <td>
+            {{#unless complete}}
+                {{#if uploading}}
+                    <button name="stop" type="button">Stop</button>
+                {{else}}
+                    <button name="start" type="button">Start</button>
+                {{/if}}
+                <button name="abort" type="button">Abort</button>
+            {{/unless}}
+        </td>
+        <td>{{complete}}</td>
+        <td>
+            <button name="delete" type="button">Delete</button>
+        </td>
+    </tr>
+</template>

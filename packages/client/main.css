@@ -1,0 +1,64 @@
+/* CSS declarations go here */
+
+body {
+    color: #555;
+    font-size: 90%;
+    font-family: sans-serif;
+}
+
+a {
+    color: dodgerblue;
+    text-decoration: none;
+    -webkit-transition: all 200ms;
+    -moz-transition: all 200ms;
+    -ms-transition: all 200ms;
+    -o-transition: all 200ms;
+    transition: all 200ms;
+}
+
+a:focus, a:hover {
+    color: deepskyblue;
+    text-decoration: underline;
+}
+
+table {
+    margin: 20px 0;
+    width: 100%;
+}
+
+td {
+    border-bottom: solid 1px #eee;
+    padding: 5px;
+    text-align: left;
+}
+
+th {
+    border-bottom: solid 2px #ddd;
+    padding: 5px;
+    text-align: left;
+}
+
+button {
+    background: #888;
+    border: none;
+    border-radius: 3px;
+    color: #eee;
+    cursor: pointer;
+    padding: 5px;
+}
+
+button:hover {
+    background: #aaa;
+    color: #fff;
+}
+
+.bar {
+    background: #eee;
+    padding: 10px;
+}
+
+#page {
+    margin: 20px auto;
+    max-width: 1000px;
+    width: 100%;
+}
