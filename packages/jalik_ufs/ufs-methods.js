@@ -1,3 +1,6 @@
+const Future = Npm.require('fibers/future');
+const fs = Npm.require('fs');
+
 Meteor.methods({
     
     'ufs.insert': function(file){

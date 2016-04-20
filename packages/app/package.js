@@ -12,20 +12,21 @@ Package.onUse(function (api) {
     api.versionsFrom('1.3.2');
     api.use('check');
     api.use('underscore');
-    api.use('ecmascript');
     api.use('mongo');
-    api.use('blaze-html-templates');
+    api.use('angular@1.3.10');
     api.use('jalik:ufs@0.6.0');
     api.use('jalik:ufs-template-helpers@0.6.0');
     api.use('seba:ufs-wabs@0.1.0');
 
     api.addFiles(['shared/collections.js'],['client','server']);
     api.addFiles(['server/main.js'],['server']);
-    //api.addFiles([
-    //    'client/main.js',
-    //    'client/main.css',
-    //    'client/main.html'
-    //],['client']);
+    api.addFiles([
+       'client/main.js',
+       'client/main.css',
+       'client/main.html',
+       'client/upload.html',
+       'client/uploads.html'
+    ],['client']);
 });
 
 Npm.depends({

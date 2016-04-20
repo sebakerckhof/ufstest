@@ -23,10 +23,11 @@ Package.onUse(function (api) {
         'ufs.js',
         'ufs-config.js'
     ],['client','server']);
+    
     api.addFiles([
         'ufs-uploader.js'
-
     ],['client']);
+    
     api.addFiles([
         'ufs-filter.js',
         'ufs-store.js',

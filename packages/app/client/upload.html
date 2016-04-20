@@ -1,0 +1,27 @@
+<tr>
+    <td>
+        <img ng-if="vm.file.uploading" src="/spinner.gif" width="48" height="48">
+        <!--<audio src="{{url}}" controls></audio>-->
+        <!--<img src="{{thumb.url}}">-->
+        <!--<img src="/file.png" width="48" height="48">-->
+        <!--<video src="{{url}}" controls width="64" height="64"></video>-->
+    </td>
+    <td><a href="{{vm.file.versions.original.url}}" target="_blank">{{vm.file.name}}</a></td>
+    <td>{{vm.file.type}}</td>
+    <td>{{vm.file.versions.original.extension}}</td>
+    <td style="white-space: nowrap">{{vm.file.versions.original.size | size}}</td>
+    <td>
+        {{versions.original.processing}}
+    </td>
+    <td>
+        <div  ng-if="!vm.file.complete">
+            <button type="button" ng-click="vm.pause()" ng-if="vm.file.uploading">Pause</button>
+            <button type="button" ng-click="vm.start()" ng-if="!vm.file.uploading">Start</button>
+            <button type="button" ng-click="vm.abort()">Abort</button>
+        </div>
+    </td>
+    <td>{{vm.file.complete}}</td>
+    <td>
+        <button type="button" ng-click="vm.delete()">Delete</button>
+    </td>
+</tr>

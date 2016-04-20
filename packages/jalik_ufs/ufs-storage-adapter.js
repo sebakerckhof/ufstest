@@ -22,12 +22,8 @@ class StorageAdapter{
   
   constructor(options = {}){
 
+    options = Object.assign({},options);
     // Set default options
-    options = Object.assign({
-      transformRead: null,
-      transformWrite: null
-    }, options);
-
     optionsSchema.clean(options);
     check(options,optionsSchema);
 

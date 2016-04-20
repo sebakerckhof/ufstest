@@ -1,4 +1,4 @@
-import { Meteor } from 'meteor/meteor';
+
 
 
 const store = new UploadFS.Store({
@@ -8,11 +8,11 @@ const store = new UploadFS.Store({
         new UploadFS.ExtensionsFilter(['jpg','png','bmp'])
     ],
     storage:[
-        new UploadFS.WABSStore({
+        new UploadFS.WABStorageAdapter({
             name:'original',
             container:'origi'
         }),
-        new UploadFS.WABSStore({
+        new UploadFS.WABStorageAdapter({
             name:'thumbnails',
             container:'thumbs',
             transformWrite: function (from, to, fileId, file) {
@@ -37,6 +37,10 @@ const store = new UploadFS.Store({
     ]
 });
 
+
+Meteor.publish('files',function(){
+    return Images.find({});
+});
 
 Meteor.startup(() => {
   // code to run on server at startup

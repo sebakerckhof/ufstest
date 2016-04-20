@@ -1,6 +1,6 @@
 const optionsSchema = new SimpleSchema({
     adaptive:{
-        type:String,
+        type:Boolean,
         optional:true,
         defaultValue:true
     },
@@ -20,7 +20,7 @@ const optionsSchema = new SimpleSchema({
         type: ArrayBuffer
     },
     file:{
-        type: Object,
+        type: File,
         optional:true
     },
     maxChunkSize:{
@@ -96,7 +96,7 @@ class Uploader{
         this.timeA = null;
         this.timeB = null;
         
-        file.store = this._store;
+        this._file.store = this._store;
     }
 
     /**
@@ -104,6 +104,7 @@ class Uploader{
      */
     abort(){
         this.isUploading = false;
+
 
         // Remove the file from database
         Meteor.call('ufs.remove',this._fileId,this._store, (err) => {
@@ -201,7 +202,7 @@ class Uploader{
 
                         if (this._offset < this.total) {
                             // Prepare the chunk
-                            const chunk = new Uint8Array(data, this._offset, length);
+                            const chunk = new Uint8Array(this._data, this._offset, length);
                             const progress = (this._offset + length) / this.total;
 
                             this.timeA = Date.now();
@@ -245,7 +246,7 @@ class Uploader{
                                             length = this.maxChunkSize;
                                         }
                                     }
-                                    this.onProgress(file, this.progress);
+                                    this.onProgress(this._file, this.progress);
                                     sendChunk();
                                 }
                             });
@@ -271,14 +272,22 @@ class Uploader{
             }
 
             if (!this._fileId) {
+                const fileToWrite = {
+                  name: this._file.name,
+                    store:this._file.store,
+                    size:this._file.size,
+                    lastModifiedDate: this._file.lastModifiedDate,
+                    lastModified:this._file.lastModified
+                };
+             
                 // Insert the file in the collection
-                Meteor.call('ufs.insert',file, (err, uploadId) => {
+                Meteor.call('ufs.insert',fileToWrite, (err, uploadId) => {
                     if (err) {
                         this.onError(err);
                     } else {
                         this._fileId = uploadId;
                         this._file._id = this._fileId;
-                        this.onCreate(file);
+                        this.onCreate(this._file);
                         upload();
                     }
                 });
@@ -301,7 +310,7 @@ class Uploader{
 
             Meteor.call('ufs.setUploading',this._fileId,this._store,false);
          
-            this.onStop(file);
+            this.onStop(this._file);
         }
     }
 

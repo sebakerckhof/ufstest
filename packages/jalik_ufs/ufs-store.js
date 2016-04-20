@@ -1,3 +1,5 @@
+const fs = Npm.require('fs');
+
 const optionsSchema = new SimpleSchema({
     name: {
         type: String,
@@ -56,7 +58,8 @@ class Store{
         UploadFS.addStore(this);
 
         // Code executed before inserting file
-        this.collection.before.insert(function (userId, file) {
+        this.collection.before.insert((userId, file) => {
+            console.log(file);
             if (typeof file.name !== 'string' || !file.name.length) {
                 throw new Meteor.Error(400, "file name not defined");
             }
@@ -84,13 +87,13 @@ class Store{
         });
 
         // Code executed before removing file
-        this.collection.before.remove(function (userId, file) {
+        this.collection.before.remove((userId, file) => {
           this.remove(file);
         });
 
         this.collection.deny({
             // Test filter on file insertion
-            insert: function (userId, file) {
+            insert: (userId, file) => {
                 this.filters.forEach(filter => {
                     filter.check(file);
                 });
@@ -109,8 +112,8 @@ class Store{
         const tmpFile = UploadFS.getTempFilePath(file._id);
 
         // Delete the temp file
-        fs.stat(tmpFile, function (err) {
-            !err && fs.unlink(tmpFile, function (err) {
+        fs.stat(tmpFile, (err) => {
+            !err && fs.unlink(tmpFile,(err) =>  {
                 err && console.error(`ufs: cannot delete temp file at ${ tmpFile } (${ err.message })`);
             });
         });
@@ -144,7 +147,7 @@ class Store{
     }
 
     getVersion(name){
-        return this._storage.find(storage => storage.name === name);
+        return this.storage.find(storage => storage.name === name);
     }
 
     /**
@@ -204,7 +207,7 @@ class Store{
             const ws = storage.getWriteStream(fileId,file);
 
             const update = {$set:{}};
-            update[`versions.${storage.name}`] = {
+            update.$set[`versions.${storage.name}`] = {
                 processing:true
             };
             this.collection.update(fileId, update);
@@ -224,7 +227,7 @@ class Store{
                 
                 readStream.on('end', Meteor.bindEnvironment(() => {
 
-                    update[`versions.${storage.name}`] = {
+                    update.$set[`versions.${storage.name}`] = {
                         size: size,
                         stored: true,
                         processing:false,

@@ -14,8 +14,8 @@ Package.onUse(function (api) {
     api.use('underscore');
     api.use('ecmascript');
     api.use('mongo');
-    api.use('jalik:ufs@0.5.3');
-    api.addFiles('ufs-wabs.js');
+    api.use('jalik:ufs@0.6.0');
+    api.addFiles('ufs-wabs.js','server');
 });
 
 Npm.depends({

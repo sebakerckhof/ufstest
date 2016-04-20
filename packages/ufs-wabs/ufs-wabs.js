@@ -15,7 +15,7 @@ class WABSStorageAdapter extends UploadFS.StorageAdapter{
     this.folder = options.folder;
     if (typeof this.folder === "string" && this.folder.length) {
       if (this.folder.slice(0, 1) === "/") {
-        this.folder = thsi.folder.slice(1);
+        this.folder = this.folder.slice(1);
       }
       if (this.folder.slice(-1) !== "/") {
         this.folder += "/";
@@ -86,18 +86,10 @@ class WABSStorageAdapter extends UploadFS.StorageAdapter{
         if (error) {
           writeStream.emit('error', error);
         } else {
-          var size;
-          if (options.rangeStart) {
-            var endOffset = properties.contentLength - 1;
-            var end = options.rangeEnd ? Math.min(options.rangeEnd, endOffset) : endOffset;
-            size = end - options.rangeStart + 1;
-          } else {
-            size = properties.contentLength;
-          }
           // Emit end and return the fileId, size, and updated date
           writeStream.emit('stored', {
             fileId: fileId,
-            size: size,
+            size: properties.contentLength,
             storedAt: new Date()
           });
         }

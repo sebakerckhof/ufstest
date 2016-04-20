@@ -1,0 +1,27 @@
+<form>
+    <div class="bar">
+        <button name="upload" type="button" ng-click="vm.upload()">Upload</button>
+    </div>
+    <table>
+        <thead>
+        <tr>
+            <th></th>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Extension</th>
+            <th>Size</th>
+            <th>Uploading</th>
+            <th>Processing</th>
+            <th>Complete</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        <ufs-upload ng-repeat="file in vm.files" file="file"></ufs-upload>
+        <tr ng-if="!vm.files.length">
+            <td colspan="8" style="text-align: center">No files</td>
+        </tr>
+        </tbody>
+    </table>
+</form>
+
