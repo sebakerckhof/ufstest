@@ -35,18 +35,7 @@ const optionsSchema = new SimpleSchema({
 class Store{
     constructor(options = {}){
         // Set default options
-        options = Object.assign({
-            collection: null,
-            filter: null,
-            name: null,
-            onCopyError: null,
-            onFinishUpload: null,
-            onRead: null,
-            onReadError: null,
-            onWriteError: null,
-            transformRead: null,
-            transformWrite: null
-        }, options);
+        options = Object.assign({}, options);
 
         optionsSchema.clean(options);
         check(options,optionsSchema);
@@ -105,7 +94,7 @@ class Store{
         // Delete the physical file in the storages
         this.storage.forEach(storage => {
             if(file.versions.hasOwnProperty(storage.name) && file.versions[storage.name].stored){
-                storage.delete(file);
+                storage.delete(file._id, file);
             }
         });
 
@@ -192,69 +181,94 @@ class Store{
      * @param fileId
      * @param callback
      */
-    write(rs, fileId, callback) {
+    write(rs, fileId, callback, onFinish) {
         const file = this.collection.findOne(fileId);
 
-        const promises = [];
+        const originalStorage = this._storage[0];
+        const copieStorages = [...this._storage];
 
-        const errorHandler = Meteor.bindEnvironment(err => {
-            this.collection.remove(fileId);
-            this.onWriteError.call(this, err, fileId, file);
-            callback.call(this, err);
+        const copyHandler = Meteor.bindEnvironment(err => {
+            const previousStorage = copieStorages.shift();
+            if(copieStorages.length){
+                const currentStorage = copieStorages[0];
+                const readStream = previousStorage.getReadStream(fileId, file);
+                this.writeCopy(readStream,currentStorage,fileId,file,copyHandler);
+            }else{
+                onFinish.call(this);
+            }
         });
 
-        this._storage.forEach(storage => {
-            const ws = storage.getWriteStream(fileId,file);
+        this.writeCopy(rs,originalStorage,fileId,file,Meteor.bindEnvironment(err => {
+            if(err){
+                this.collection.remove(fileId);
+                this.onWriteError.call(this, err, fileId, file);
+                callback.call(this, err);
+            }else{
+                callback.call(this, null, file);
 
-            const update = {$set:{}};
+                // Execute callback
+                if (typeof this.onFinishUpload == 'function') {
+                    this.onFinishUpload.call(this, file);
+                }
+                copyHandler();
+            }
+        }));
+    }
+
+    writeCopy(rs,storage,fileId,file,callback){
+        const ws = storage.getWriteStream(fileId,file);
+
+        const update = {$set:{}};
+
+        update.$set[`versions.${storage.name}`] = {
+            processing:true
+        };
+
+        this.collection.update(fileId, update);
+
+        ws.on('error', Meteor.bindEnvironment((error) => {
             update.$set[`versions.${storage.name}`] = {
-                processing:true
+                stored: false,
+                processing:false,
             };
             this.collection.update(fileId, update);
 
-            ws.on('error', errorHandler);
-            ws.on('finish', Meteor.bindEnvironment(() => {
-                let size = 0;
-                const readStream = storage.getReadStream(fileId, file);
+            callback(error, null);
+        }));
 
-                readStream.on('error', Meteor.bindEnvironment((error) => {
-                    callback.call(this, error, null);
-                }));
-                
-                readStream.on('data', Meteor.bindEnvironment(data => {
-                    size += data.length;
-                }));
-                
-                readStream.on('end', Meteor.bindEnvironment(() => {
+        ws.on('finish', Meteor.bindEnvironment(() => {
+            let size = 0;
+            const readStream = storage.getReadStream(fileId, file);
 
-                    update.$set[`versions.${storage.name}`] = {
-                        size: size,
-                        stored: true,
-                        processing:false,
-                        url : this.getFileURL(fileId,storage.name)
-                    };
-                    
-                    this.collection.update(fileId, update);
+            readStream.on('error', Meteor.bindEnvironment((error) => {
+                update.$set[`versions.${storage.name}`] = {
+                    stored: false,
+                    processing:false,
+                };
+                this.collection.update(fileId, update);
 
-
-                    // Return file info
-                    callback.call(this, null, file);
-
-                    // Execute callback
-                    if (typeof this.onFinishUpload == 'function') {
-                        this.onFinishUpload.call(this, file);
-                    }
-
-                    // Simulate write speed
-                    if (UploadFS.config.simulateWriteDelay) {
-                        Meteor._sleepForMs(UploadFS.config.simulateWriteDelay);
-                    }
-
-                }));
+                callback(error, null);
             }));
-            // Execute transformation
-            storage.transformWrite(rs, ws, fileId, file);
-        });
+
+            readStream.on('data', Meteor.bindEnvironment(data => {
+                size += data.length;
+            }));
+
+            readStream.on('end', Meteor.bindEnvironment(() => {
+
+                update.$set[`versions.${storage.name}`] = {
+                    size: size,
+                    stored: true,
+                    processing:false,
+                    url : this.getFileURL(fileId,storage.name)
+                };
+
+                this.collection.update(fileId, update);
+                callback(null, file);
+            }));
+        }));
+
+        storage.transformWrite(rs, ws, fileId, file);
     }
 
     /**
@@ -262,6 +276,12 @@ class Store{
      * @param file
      */
     onFinishUpload(file){}
+
+    /**
+     * Called when a file has been uploaded
+     * @param file
+     */
+    onFinishProcessing(file){}
 
     /**
      * Called when a file is read from the store

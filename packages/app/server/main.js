@@ -12,9 +12,8 @@ const store = new UploadFS.Store({
             name:'original',
             container:'origi'
         }),
-        new UploadFS.WABStorageAdapter({
+        new UploadFS.LocalStorageAdapter({
             name:'thumbnails',
-            container:'thumbs',
             transformWrite: function (from, to, fileId, file) {
                 // Resize images
                 if (file.type.indexOf('image/') === 0) {

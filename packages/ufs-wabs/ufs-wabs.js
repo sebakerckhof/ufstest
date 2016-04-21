@@ -1,6 +1,5 @@
-if (Meteor.isServer) {
-  var WABS = Npm.require('azure-storage');
-}
+const WABS = Npm.require('azure-storage');
+
 
 
 /**
@@ -49,14 +48,16 @@ class WABSStorageAdapter extends UploadFS.StorageAdapter{
    * @param fileId
    * @param callback
    */
-  delete(fileId, callback){
+  delete(fileId, file, callback){
+    const path = this.folder + fileId;
+
     if (typeof callback !== 'function') {
       callback = function (err) {
         err && console.error(`ufs: cannot delete file "${ fileId }" at ${ path } (${ err.message })`);
       }
     }
 
-    this.WABSBlobService.deleteBlob(this.container, this.folder + fileId, function(error) {
+    this.WABSBlobService.deleteBlob(this.container, path, function(error) {
       callback(error, !error);
     });
   }

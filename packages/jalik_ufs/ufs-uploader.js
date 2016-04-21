@@ -273,11 +273,12 @@ class Uploader{
 
             if (!this._fileId) {
                 const fileToWrite = {
-                  name: this._file.name,
+                    name: this._file.name,
                     store:this._file.store,
                     size:this._file.size,
+                    type:this._file.type,
                     lastModifiedDate: this._file.lastModifiedDate,
-                    lastModified:this._file.lastModified
+                    lastModified:this._file.lastModified,
                 };
              
                 // Insert the file in the collection

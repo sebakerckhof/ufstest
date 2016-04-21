@@ -17,6 +17,7 @@ Package.onUse(function (api) {
     api.use('jalik:ufs@0.6.0');
     api.use('jalik:ufs-template-helpers@0.6.0');
     api.use('seba:ufs-wabs@0.1.0');
+    api.use('jalik:ufs-local@0.2.5');
 
     api.addFiles(['shared/collections.js'],['client','server']);
     api.addFiles(['server/main.js'],['server']);

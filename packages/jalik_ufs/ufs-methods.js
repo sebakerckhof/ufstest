@@ -84,9 +84,6 @@ Meteor.methods({
 
         // Save file in the store
         store.write(rs, fileId, Meteor.bindEnvironment(function (err, file) {
-            fs.unlink(tmpFile, function (err) {
-                err && console.error(`ufs: cannot delete temp file ${ tmpFile } (${ err.message })`);
-            });
 
             // Set file attribute
             store.collection.update(fileId,{
@@ -104,6 +101,10 @@ Meteor.methods({
             } else {
                 fut.return(file);
             }
+        }), Meteor.bindEnvironment(function (err, file) {
+            fs.unlink(tmpFile, function (err) {
+                err && console.error(`ufs: cannot delete temp file ${ tmpFile } (${ err.message })`);
+            });
         }));
         return fut.wait();
     },

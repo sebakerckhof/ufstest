@@ -104,19 +104,19 @@ function ufsUploadCtrl($scope, $reactive) {
     $reactive(this).attach($scope);
 
     this.delete = () => {
-        Images.remove(this._id);
+        Meteor.call('ufs.remove',this.file._id,'files');
     };
 
     this.abort = () => {
-        workers[this._id].abort();
+        workers[this.file._id].abort();
     };
 
     this.start = () => {
-        workers[this._id].start();
+        workers[this.file._id].start();
     };
 
     this.pause = () => {
-        workers[this._id].stop();
+        workers[this.file._id].stop();
     };
 
 };
